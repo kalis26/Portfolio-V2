@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css";
 
 const calSans = localFont({
@@ -54,6 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <>
     <html
       lang="en"
       className={`${calSans.variable} ${gotham.variable}`}
@@ -64,5 +66,7 @@ export default function RootLayout({
       </head>
       <body>{children}</body>
     </html>
+    <Analytics/>
+    </>
   );
 }
