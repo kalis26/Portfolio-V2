@@ -29,6 +29,10 @@ type Project = {
   highlights: string[];
   image?: string;
   imageAlt?: string;
+  repoUrl?: string;
+  demoUrl?: string;
+  demoLabel?: string;
+  repoPending?: boolean;
 };
 
 type TimelineItem = {
@@ -99,6 +103,7 @@ const content = {
         ],
         image: "/assets/SDECHPF.png",
         imageAlt: "Blue SD card artwork representing ESICodeHub",
+        repoPending: true,
       },
       {
         title: "iTuneUp",
@@ -114,6 +119,9 @@ const content = {
         ],
         image: "/assets/SDITUNEUPPF.png",
         imageAlt: "Blue SD card artwork representing the iTuneUp project",
+        repoUrl: "https://github.com/kalis26/iTuneUp",
+        demoUrl: "https://ituneup.vercel.app/",
+        demoLabel: "Showcase",
       },
       {
         title: "Senza",
@@ -125,6 +133,9 @@ const content = {
         highlights: ["- Product browsing flow", "- Secure account foundation", "- Full-stack commerce architecture"],
         image: "/assets/SDSENZAPF.png",
         imageAlt: "Black and white SD card artwork representing the Senza project",
+        repoUrl: "https://github.com/kalis26/Senza",
+        demoUrl: "https://senza-eight.vercel.app",
+        demoLabel: "Live",
       },
       {
         title: "Atlix Media",
@@ -136,6 +147,8 @@ const content = {
         highlights: ["- Need analysis", "- Responsive modern interface", "- Feedback-driven delivery"],
         image: "/assets/atlixmedia.png",
         imageAlt: "MiniDisc case artwork representing the Atlix Media project",
+        demoUrl: "https://atlix-media.vercel.app/",
+        demoLabel: "Live",
       },
     ] satisfies Project[],
     experienceTitle: "Install log",
@@ -254,6 +267,7 @@ const content = {
         ],
         image: "/assets/SDECHPF.png",
         imageAlt: "Carte SD bleue representant ESICodeHub",
+        repoPending: true,
       },
       {
         title: "iTuneUp",
@@ -269,6 +283,9 @@ const content = {
         ],
         image: "/assets/SDITUNEUPPF.png",
         imageAlt: "Carte SD bleue representant le projet iTuneUp",
+        repoUrl: "https://github.com/kalis26/iTuneUp",
+        demoUrl: "https://ituneup.vercel.app/",
+        demoLabel: "Showcase",
       },
       {
         title: "Senza",
@@ -280,6 +297,9 @@ const content = {
         highlights: ["- Parcours de consultation produit", "- Base d'authentification securisée", "- Architecture commerce full-stack"],
         image: "/assets/SDSENZAPF.png",
         imageAlt: "Carte SD noire et blanche representant le projet Senza",
+        repoUrl: "https://github.com/kalis26/Senza",
+        demoUrl: "https://senza-eight.vercel.app",
+        demoLabel: "Live",
       },
       {
         title: "Atlix Media",
@@ -291,6 +311,8 @@ const content = {
         highlights: ["- Analyse du besoin", "- Interface moderne responsive", "- Adaptation aux retours"],
         image: "/assets/atlixmedia.png",
         imageAlt: "Boitier MiniDisc representant le projet Atlix Media",
+        demoUrl: "https://atlix-media.vercel.app/",
+        demoLabel: "Live",
       },
     ] satisfies Project[],
     experienceTitle: "Install log",
@@ -384,7 +406,12 @@ function usePortfolioMotion(language: Language) {
             return () => window.clearTimeout(refreshTimer);
           }
 
-          gsap.set(get(".disk-hero, .ticket-pass, .project-grid, .project-card"), {
+          gsap.set(get(".disk-hero"), {
+            rotation: -3.98,
+            force3D: true,
+          });
+
+          gsap.set(get(".ticket-pass, .project-grid, .project-card"), {
             force3D: true,
           });
 
@@ -395,11 +422,16 @@ function usePortfolioMotion(language: Language) {
               { y: 28, autoAlpha: 0, duration: 0.72, stagger: 0.07 },
               "-=0.18",
             )
-            .from(get(".disk-hero"), { scale: 0.94, rotation: -8, autoAlpha: 0, duration: 0.82, ease: "power4.out" }, "-=0.62");
+            .fromTo(
+              get(".disk-hero"),
+              { y: 18, scale: 0.94, rotation: -3.98, autoAlpha: 0 },
+              { y: 0, scale: 1, rotation: -3.98, autoAlpha: 1, duration: 0.82, ease: "power4.out" },
+              "-=0.62",
+            );
 
           gsap.to(get(".disk-hero"), {
             y: desktop ? -60 : -24,
-            rotation: desktop ? 5 : 2,
+            rotation: desktop ? -1.8 : -2.6,
             ease: "none",
             scrollTrigger: {
               trigger: "#home",
@@ -425,6 +457,7 @@ function usePortfolioMotion(language: Language) {
             (element) =>
               !element.closest("#projects") &&
               !element.classList.contains("experience-heading") &&
+              !element.classList.contains("ticket-pass") &&
               !element.classList.contains("spec-board"),
           );
           const specGroups = get<HTMLElement>(".spec-group");
@@ -485,9 +518,6 @@ function usePortfolioMotion(language: Language) {
           if (desktop) {
             const projectRail = get<HTMLElement>(".project-rail")[0];
             const projectTrack = get<HTMLElement>(".project-grid")[0];
-            const experienceSection = get<HTMLElement>("#experience")[0];
-            const experienceHeading = get<HTMLElement>(".experience-heading")[0];
-            const lastTimelineCard = timelineCards[timelineCards.length - 1];
 
             if (projectRail && projectTrack) {
               const getTrackDistance = () => Math.max(0, projectTrack.scrollWidth - window.innerWidth);
@@ -506,28 +536,6 @@ function usePortfolioMotion(language: Language) {
                   invalidateOnRefresh: true,
                   refreshPriority: -10,
                 },
-              });
-            }
-
-            if (experienceSection && experienceHeading && lastTimelineCard) {
-              ScrollTrigger.create({
-                id: "experience-heading-pin",
-                trigger: experienceSection,
-                start: () => {
-                  const projectTrigger = ScrollTrigger.getById("projects-horizontal");
-                  const sectionStart = experienceSection.offsetTop - window.innerHeight * 0.14;
-                  return Math.max(sectionStart, projectTrigger?.end ?? 0);
-                },
-                endTrigger: lastTimelineCard,
-                end: () => {
-                  const headingBottom = window.innerHeight * 0.14 + experienceHeading.offsetHeight;
-                  return `bottom ${Math.round(headingBottom)}px`;
-                },
-                pin: experienceHeading,
-                pinSpacing: false,
-                anticipatePin: 1,
-                invalidateOnRefresh: true,
-                refreshPriority: -9,
               });
             }
           } else {
@@ -628,7 +636,7 @@ export default function Home() {
         <div className="hero-copy-wrap">
           <p className="hero-kicker">{t.hero.eyebrow}</p>
           <h1 className="hero-title">
-            <span className="title-line">{t.hero.titleA} <span className="inline-disc" aria-hidden="true" /></span>
+            <span className="title-line">{t.hero.titleA}</span>
             <span className="title-line title-pink">{t.hero.titleB} {t.hero.titleC}</span>
           </h1>
           <p className="hero-copy">{t.hero.subtitle}</p>
@@ -738,6 +746,25 @@ export default function Home() {
                       <li key={highlight}>{highlight}</li>
                     ))}
                   </ul>
+                  <div className="project-actions" aria-label={`${project.title} links`}>
+                    {project.repoUrl ? (
+                      <a href={project.repoUrl} target="_blank" rel="noreferrer">
+                        <Code2 className="icon" aria-hidden="true" />
+                        GitHub
+                      </a>
+                    ) : project.repoPending ? (
+                      <span className="project-action-disabled">
+                        <Code2 className="icon" aria-hidden="true" />
+                        {language === "en" ? "GitHub soon" : "GitHub bientÃ´t"}
+                      </span>
+                    ) : null}
+                    {project.demoUrl ? (
+                      <a href={project.demoUrl} target="_blank" rel="noreferrer">
+                        <ExternalLink className="icon" aria-hidden="true" />
+                        {project.demoLabel ?? "Live"}
+                      </a>
+                    ) : null}
+                  </div>
                 </div>
               </article>
             ))}
@@ -745,7 +772,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section-grid" id="experience">
+      <section className="section-grid experience-section" id="experience">
         <div className="section-heading reveal experience-heading">
           <p className="section-label">{t.experienceTitle}</p>
           <h2>{language === "en" ? "Experience, clubs, and practical work" : "Expérience, clubs et travail pratique"}</h2>
